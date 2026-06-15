@@ -1,0 +1,141 @@
+﻿.section {
+  padding: 96px 0;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 44px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #AFC1FF;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: clamp(30px, 3.8vw, 50px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-left: 36px;
+}
+
+.track {
+  position: absolute;
+  left: 16px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, rgba(61, 108, 245, 0.92), rgba(0, 76, 167, 0.45));
+}
+
+.step {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+}
+
+.dot {
+  position: absolute;
+  left: -36px;
+  top: 18px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #dbe5ff;
+  background: rgba(61, 108, 245, 0.2);
+  border: 1px solid #004CA7;
+  box-shadow: 0 0 0 6px var(--bg-primary);
+}
+
+.stepCard {
+  width: 100%;
+  border-radius: 24px;
+  border: 1px solid #004CA7;
+  background: linear-gradient(153deg, #012047 1.32%, #00070F 98.1%);
+  padding: 24px;
+}
+
+.stepNumber {
+  font-size: 11px;
+  font-weight: 700;
+  color: #AFC1FF;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+
+.stepTitle {
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.stepDescription {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .section {
+    margin-top: 80px;
+    padding: 72px 0;
+  }
+
+  .container {
+    padding: 0 20px;
+  }
+
+  .timeline {
+    padding-left: 0;
+    gap: 14px;
+  }
+
+  .track,
+  .dot {
+    display: none;
+  }
+
+  .stepCard {
+    padding: 18px;
+  }
+
+  .stepTitle {
+    font-size: 20px;
+  }
+
+  .stepDescription {
+    font-size: 14px;
+  }
+}
+
+

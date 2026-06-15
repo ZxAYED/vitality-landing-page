@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vitalyze — Scroll Hero</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RESET & ROOT
+============================================================ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --black:  #05050d;
+  --dark:   #0a0a18;
+  --white:  #F5F3EE;
+  --teal:   #00C9A7;
+  --teal2:  #00897B;
+  --blue:   #1a6fff;
+  --muted:  rgba(245,243,238,0.45);
+  --glass:  rgba(255,255,255,0.05);
+  --gb:     rgba(255,255,255,0.09);
+  --sp: cubic-bezier(0.34,1.56,0.64,1);
+  --eo: cubic-bezier(0.16,1,0.3,1);
+}
+html { scroll-behavior: auto; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   SCROLL CONTAINER
+   The hero is "sticky" — it pins for 300vh of scroll distance.
+   This gives the scroll-driven animation plenty of room.
+============================================================ */
+.scroll-container {
+  height: 400vh; /* 4x viewport = lots of scroll room */
+  position: relative;
+}
+.sticky-hero {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   BACKGROUND LAYERS
+============================================================ */
+/* Sky gradient — shifts from black (frame1) to deep teal-blue (frame2) */
+.bg-sky {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 110%,
+    rgba(0,201,167,0) 0%,
+    rgba(0,201,167,0) 100%);
+  transition: none;
+  z-index: 0;
+}
+
+/* Grid */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,201,167,0.07) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(0,201,167,0.07) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: 1;
+  opacity: 1;
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+}
+
+/* Perspective floor grid (Stride-style) */
+.bg-floor {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background-image:
+    linear-gradient(rgba(0,201,167,0.12) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(0,201,167,0.09) 1px, transparent 1px);
+  background-size: 80px 80px;
+  transform: perspective(600px) rotateX(70deg);
+  transform-origin: bottom center;
+  z-index: 1;
+  opacity: 0.6;
+  will-change: opacity;
+  mask-image: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 80%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 80%);
+}
+
+/* Ambient glow behind phone */
+.bg-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,201,167,0.13) 0%, transparent 65%);
+  z-index: 2;
+  opacity: 0.5;
+  will-change: opacity, transform;
+  pointer-events: none;
+}
+
+/* ============================================================
+   NAV
+============================================================ */
+.nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  padding: 22px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--white);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.nav-logo em { color: var(--teal); font-style: normal; }
+.nav-center {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  padding: 10px 28px;
+  display: flex;
+  gap: 28px;
+}
+.nav-link {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  transition: color .2s;
+}
+.nav-link:hover { color: var(--white); }
+.nav-right { display: flex; align-items: center; gap: 14px; }
+.nav-lang { font-size: 13px; color: rgba(255,255,255,0.4); }
+.nav-cta {
+  background: var(--white);
+  color: var(--black);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 11px 22px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+
+/* ============================================================
+   HERO HEADLINE (left side, Stride-style)
+============================================================ */
+.hero-headline {
+  position: absolute;
+  left: 7%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  max-width: 440px;
+  will-change: transform, opacity;
+}
+.hero-eyebrow {
+  font-size: 11px;
+  color: var(--teal);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s var(--eo), transform .6s var(--eo);
+}
+.hero-h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 4vw, 58px);
+  font-weight: 800;
+  line-height: 1.08;
+  margin-bottom: 18px;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .7s .08s var(--eo), transform .7s .08s var(--eo);
+}
+.hero-h1 em { font-style: normal; color: var(--teal); }
+.hero-sub {
+  font-size: 16px;
+  color: var(--muted);
+  line-height: 1.75;
+  margin-bottom: 28px;
+  max-width: 360px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s .18s var(--eo), transform .6s .18s var(--eo);
+}
+.hero-btns {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .6s .26s var(--eo), transform .6s .26s var(--eo);
+}
+.btn-primary {
+  background: var(--teal);
+  color: #000;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,201,167,.35); }
+.btn-ghost {
+  background: transparent;
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  padding: 14px 28px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.22);
+  cursor: pointer;
+  transition: border-color .2s;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.5); }
+
+/* event card (Stride-style left card) */
+.event-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  padding: 18px 20px;
+  max-width: 280px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s .34s var(--eo), transform .6s .34s var(--eo);
+}
+.event-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.event-date {
+  font-size: 13px;
+  color: var(--teal);
+  margin-bottom: 12px;
+}
+.avatars {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--black);
+  margin-right: -8px;
+  font-family: 'Syne',sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.av1 { background: #e8795a; }
+.av2 { background: #5a9ee8; }
+.av3 { background: #a85ae8; }
+.av4 { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); font-size: 9px; }
+.avatar-label { margin-left: 18px; font-size: 11px; color: var(--muted); }
+.event-desc { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.6; }
+
+/* ============================================================
+   PHONE (center-right, Stride-style)
+============================================================ */
+.phone-scene {
+  position: absolute;
+  right: 18%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  will-change: transform;
+}
+
+/* Pulse rings (horizontal ellipses around phone, Stride-style) */
+.ring-wrap {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+.pring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(1);
+  border-radius: 50%;
+  border: 1px solid rgba(0,201,167,0.25);
+}
+.pring-1 { width: 320px; height: 120px; animation: ringPulse 3s ease-out 0s infinite; }
+.pring-2 { width: 460px; height: 170px; animation: ringPulse 3s ease-out .9s infinite; }
+.pring-3 { width: 600px; height: 220px; animation: ringPulse 3s ease-out 1.8s infinite; }
+@keyframes ringPulse {
+  0%   { opacity: .5; transform: translate(-50%,-50%) scale(.9); }
+  100% { opacity: 0;  transform: translate(-50%,-50%) scale(1.1); }
+}
+
+/* Phone shell */
+.phone-wrap {
+  position: relative;
+  z-index: 2;
+  will-change: transform;
+  animation: phoneFloat 5s ease-in-out infinite;
+}
+@keyframes phoneFloat {
+  0%,100% { transform: translateY(0) rotateY(-4deg) rotateX(2deg); }
+  50%     { transform: translateY(-18px) rotateY(-4deg) rotateX(2deg); }
+}
+.phone-shell {
+  width: 280px;
+  height: 570px;
+  background: linear-gradient(160deg, #1e1e30, #111120);
+  border: 2px solid rgba(255,255,255,0.16);
+  border-radius: 50px;
+  padding: 14px;
+  box-shadow:
+    0 80px 140px rgba(0,0,0,0.85),
+    0 0 0 1px rgba(0,201,167,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    -30px 20px 60px rgba(0,0,0,0.5);
+}
+.phone-notch {
+  width: 100px; height: 28px;
+  background: #000;
+  border-radius: 0 0 18px 18px;
+  margin: 0 auto 4px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.notch-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a1a2e; }
+.notch-cam { width: 10px; height: 10px; border-radius: 50%; background: #0d2a2a; border: 2px solid rgba(0,201,167,0.3); }
+.phone-screen {
+  height: calc(100% - 38px);
+  background: linear-gradient(170deg, #0b0b20, #090916);
+  border-radius: 38px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Status bar */
+.status-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 18px 4px;
+}
+.status-time { font-family:'Syne',sans-serif; font-size: 13px; font-weight: 700; }
+.status-icons { display:flex; gap:4px; align-items:center; }
+.sig { width:14px; height:10px; display:flex; align-items:flex-end; gap:1px; }
+.sig span { background: var(--white); border-radius: 1px; width: 3px; }
+.sig span:nth-child(1){height:3px;}
+.sig span:nth-child(2){height:5px;}
+.sig span:nth-child(3){height:7px;}
+.sig span:nth-child(4){height:9px; background:rgba(255,255,255,.3);}
+.batt {
+  width: 22px; height: 11px;
+  border: 1.5px solid rgba(255,255,255,.5);
+  border-radius: 3px; position:relative;
+  display:flex; align-items:center; padding: 1px;
+}
+.batt::after { content:''; position:absolute; right:-4px; top:50%; transform:translateY(-50%); width:2px; height:5px; background:rgba(255,255,255,.4); border-radius:0 1px 1px 0; }
+.batt-fill { height: 100%; width: 82%; background: var(--white); border-radius: 2px; }
+
+/* Screen content */
+.sc-greeting { padding: 6px 18px 0; }
+.sc-greeting-lbl { font-size:10px; color:rgba(255,255,255,.35); letter-spacing:1px; text-transform:uppercase; }
+.sc-greeting-name { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
+
+/* Big score ring */
+.sc-ring-wrap {
+  display: flex; align-items:center; justify-content:center;
+  padding: 16px 0 10px;
+  position: relative;
+}
+.sc-ring { position:relative; width:130px; height:130px; }
+.sc-ring svg { transform: rotate(-90deg); }
+.sc-ring-num {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  text-align:center;
+}
+.sc-ring-num .n { font-family:'Syne',sans-serif; font-size:36px; font-weight:800; color:var(--teal); line-height:1; }
+.sc-ring-num .l { font-size:10px; color:rgba(255,255,255,.35); letter-spacing:1px; margin-top:2px; }
+.ring-track { stroke: rgba(0,201,167,0.10); }
+.ring-fill  { stroke: #00C9A7; stroke-linecap: round; stroke-dasharray: 345; stroke-dashoffset: 69; }
+
+/* Stat row */
+.sc-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; padding:0 14px 10px; }
+.sc-stat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.sc-stat .v { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; }
+.sc-stat .u { font-size:9px; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
+.sc-stat .dot { width:5px; height:5px; border-radius:50%; background:var(--teal); margin:5px auto 0; }
+
+/* Walk/heart/sleep row */
+.sc-metrics { display:grid; grid-template-columns:1fr 1fr; gap:7px; padding:0 14px 10px; }
+.sc-metric {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius:12px; padding:10px 12px;
+}
+.sc-metric .ml { font-size:9px; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.sc-metric .mv { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; }
+.sc-metric .ms { font-size:9px; color:rgba(255,255,255,.3); }
+
+/* Heartbeat line */
+.heartbeat { display:flex; align-items:center; gap:2px; margin-top:4px; }
+.heartbeat span { display:inline-block; width:3px; border-radius:2px; background:rgba(255,80,80,0.6); }
+
+/* AI card */
+.sc-ai {
+  margin:0 14px;
+  background: linear-gradient(135deg, rgba(0,201,167,.1), rgba(0,201,167,.04));
+  border: 1px solid rgba(0,201,167,.22);
+  border-radius: 14px;
+  padding: 11px 13px;
+}
+.sc-ai-lbl { font-size:9px; color:var(--teal); letter-spacing:1.2px; text-transform:uppercase; margin-bottom:4px; }
+.sc-ai-txt { font-size:10px; color:rgba(255,255,255,.65); line-height:1.6; }
+
+/* ============================================================
+   RIGHT FLOATING CARD (Stride-style detail card)
+============================================================ */
+.detail-card {
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-40%);
+  z-index: 11;
+  width: 200px;
+  opacity: 0;
+  transition: opacity .6s var(--eo), transform .6s var(--eo);
+  will-change: transform, opacity;
+}
+.detail-card-inner {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 20px;
+  padding: 16px;
+  backdrop-filter: blur(20px);
+}
+.dc-label { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; margin-bottom:8px; }
+.dc-desc { font-size:11px; color:rgba(255,255,255,.4); line-height:1.6; margin-bottom:14px; }
+.dc-imgs { display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; margin-bottom:12px; }
+.dc-img {
+  height: 52px; border-radius: 10px;
+  overflow:hidden; background: rgba(0,201,167,0.1);
+  border: 1px solid rgba(0,201,167,0.15);
+  display:flex; align-items:center; justify-content:center;
+}
+.dc-img-icon { font-size:18px; }
+.dc-metric { display:flex; justify-content:space-between; align-items:center; }
+.dc-metric-val { font-family:'Syne',sans-serif; font-size:20px; font-weight:800; color:var(--teal); }
+.dc-metric-lbl { font-size:10px; color:rgba(255,255,255,.3); }
+
+/* Update badge (bottom right, Stride-style) */
+.update-badge {
+  position: absolute;
+  bottom: 18%;
+  right: 5%;
+  z-index: 12;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .5s .4s var(--eo), transform .5s .4s var(--eo);
+  backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+.update-icon { font-size:20px; }
+.update-text { font-family:'Syne',sans-serif; font-size:12px; font-weight:700; }
+.update-sub { font-size:10px; color:rgba(255,255,255,.4); }
+
+/* Brand logos row (bottom left, Stride-style) */
+.brand-row {
+  position: absolute;
+  bottom: 7%;
+  left: 7%;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  transition: opacity .6s .5s var(--eo);
+}
+.brand-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  text-align: center;
+  opacity: 1;
+  transition: opacity .4s;
+  cursor: default;
+}
+.scroll-line {
+  width: 1px; height: 48px;
+  background: linear-gradient(to bottom, rgba(0,201,167,.6), transparent);
+  margin: 0 auto 8px;
+  animation: scrollBounce 1.8s ease-in-out infinite;
+}
+@keyframes scrollBounce {
+  0%,100% { transform: scaleY(1); opacity: .7; }
+  50% { transform: scaleY(1.3); opacity: 1; }
+}
+.scroll-label { font-size:11px; color:rgba(255,255,255,.3); letter-spacing:1.5px; text-transform:uppercase; }
+
+/* ============================================================
+   FRAME 1 → FRAME 2 SCROLL STATES
+   JS will set CSS custom properties based on scroll progress (0-1)
+   and apply classes/inline styles driven by scrollY
+============================================================ */
+
+/* Frame 1: all UI hidden, centered layout */
+/* Frame 2: full layout revealed, Stride-style */
+
+/* Items that reveal on scroll */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity .6s var(--eo), transform .6s var(--eo);
+}
+.reveal-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   SECTION AFTER HERO (content continues below)
+============================================================ */
+.after-hero {
+  position: relative;
+  z-index: 5;
+  background: var(--black);
+  padding: 120px 7% 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+.feature-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 22px;
+  padding: 32px;
+  transition: border-color .3s, transform .3s;
+}
+.feature-card:hover { border-color: rgba(0,201,167,.25); transform: translateY(-4px); }
+.fc-icon { font-size: 28px; margin-bottom: 16px; }
+.fc-title { font-family:'Syne',sans-serif; font-size:18px; font-weight:700; margin-bottom:10px; }
+.fc-desc { font-size:14px; color:rgba(255,255,255,.4); line-height:1.75; }
+
+/* ============================================================
+   PROGRESS BAR (shows scroll progress — optional UX)
+============================================================ */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  background: var(--teal);
+  z-index: 999;
+  width: 0%;
+  transition: width .05s linear;
+  box-shadow: 0 0 8px rgba(0,201,167,.6);
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 900px) {
+  .nav { padding: 18px 24px; }
+  .nav-center, .nav-right .nav-lang { display: none; }
+  .hero-headline { left: 5%; max-width: 320px; }
+  .hero-h1 { font-size: 28px; }
+  .phone-scene { right: 2%; }
+  .phone-shell { width: 220px; height: 448px; }
+  .detail-card, .update-badge { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ============================================================
+     SCROLL CONTAINER
+============================================================ -->
+<div class="scroll-container" id="scrollContainer">
+<div class="sticky-hero" id="stickyHero">
+
+  <!-- Background layers -->
+  <div class="bg-sky"  id="bgSky"></div>
+  <div class="bg-grid" id="bgGrid"></div>
+  <div class="bg-floor" id="bgFloor"></div>
+  <div class="bg-glow" id="bgGlow"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a class="nav-logo" href="#">Vita<em>lyze</em></a>
+    <div class="nav-center">
+      <a class="nav-link" href="#">Home</a>
+      <a class="nav-link" href="#">Features</a>
+      <a class="nav-link" href="#">About</a>
+      <a class="nav-link" href="#">Contact</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-lang">🌐 English</span>
+      <button class="nav-cta">Get Started</button>
+    </div>
+  </nav>
+
+  <!-- ── LEFT: Hero headline ── -->
+  <div class="hero-headline" id="heroHeadline">
+    <div class="hero-eyebrow" id="eyebrow">AI Health Intelligence</div>
+    <h1 class="hero-h1" id="heroH1">
+      Innovation<br>
+      <em>Meets Wellness</em><br>
+      Excellence
+    </h1>
+    <p class="hero-sub" id="heroSub">
+      The only app that connects your biometrics to your mental health —
+      and reveals the patterns your body has been whispering all along.
+    </p>
+    <div class="hero-btns" id="heroBtns">
+      <button class="btn-primary">Join Waitlist — Free</button>
+      <button class="btn-ghost">▶ Watch Demo</button>
+    </div>
+    <div class="event-card" id="eventCard">
+      <div class="event-label">Early Access Launch</div>
+      <div class="event-date">Jan 15 – Jan 30, 2026</div>
+      <div class="avatars">
+        <div class="avatar av1">M</div>
+        <div class="avatar av2">A</div>
+        <div class="avatar av3">P</div>
+        <div class="avatar av4">+24</div>
+        <span class="avatar-label">People<br>Joined</span>
+      </div>
+      <div class="event-desc">Get 14 days Premium free. Be the first to experience complete health intelligence — body and mind.</div>
+    </div>
+  </div>
+
+  <!-- ── CENTER-RIGHT: Phone ── -->
+  <div class="phone-scene" id="phoneScene">
+    <!-- Pulse rings (Stride-style horizontal ellipses) -->
+    <div class="ring-wrap">
+      <div class="pring pring-1"></div>
+      <div class="pring pring-2"></div>
+      <div class="pring pring-3"></div>
+    </div>
+
+    <!-- Phone -->
+    <div class="phone-wrap" id="phoneWrap">
+      <div class="phone-shell">
+        <div class="phone-notch">
+          <div class="notch-dot"></div>
+          <div class="notch-cam"></div>
+          <div class="notch-dot"></div>
+        </div>
+        <div class="phone-screen">
+
+          <!-- Status bar -->
+          <div class="status-bar">
+            <span class="status-time">9:41</span>
+            <div class="status-icons">
+              <div class="sig"><span></span><span></span><span></span><span></span></div>
+              <div class="batt"><div class="batt-fill"></div></div>
+            </div>
+          </div>
+
+          <!-- Greeting -->
+          <div class="sc-greeting">
+            <div class="sc-greeting-lbl">Good morning</div>
+            <div class="sc-greeting-name">Alex ✦</div>
+          </div>
+
+          <!-- VScore Ring -->
+          <div class="sc-ring-wrap">
+            <div class="sc-ring">
+              <svg width="130" height="130" viewBox="0 0 130 130">
+                <circle class="ring-track" cx="65" cy="65" r="55" fill="none" stroke-width="10"/>
+                <circle class="ring-fill"  cx="65" cy="65" r="55" fill="none" stroke-width="10"/>
+              </svg>
+              <div class="sc-ring-num">
+                <div class="n">87</div>
+                <div class="l">VScore™</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="sc-stats">
+            <div class="sc-stat">
+              <div class="v">91</div>
+              <div class="u">Body</div>
+              <div class="dot"></div>
+            </div>
+            <div class="sc-stat">
+              <div class="v">83</div>
+              <div class="u">Mind</div>
+              <div class="dot"></div>
+            </div>
+            <div class="sc-stat">
+              <div class="v">84</div>
+              <div class="u">Sleep</div>
+              <div class="dot" style="background:rgba(255,255,255,.2)"></div>
+            </div>
+          </div>
+
+          <!-- Metrics -->
+          <div class="sc-metrics">
+            <div class="sc-metric">
+              <div class="ml">Walk</div>
+              <div class="mv">3,456</div>
+              <div class="ms">Steps today</div>
+              <div class="heartbeat">
+                <span style="height:4px"></span><span style="height:10px"></span>
+                <span style="height:6px"></span><span style="height:16px;background:rgba(255,80,80,0.8)"></span>
+                <span style="height:8px"></span><span style="height:12px"></span>
+                <span style="height:5px"></span><span style="height:4px"></span>
+              </div>
+            </div>
+            <div class="sc-metric">
+              <div class="ml">Sleep</div>
+              <div class="mv">7h 45m</div>
+              <div class="ms">Normal</div>
+              <div style="margin-top:6px;height:3px;background:rgba(0,201,167,.08);border-radius:2px;overflow:hidden;">
+                <div style="height:100%;width:82%;background:linear-gradient(90deg,#00897B,#00C9A7);border-radius:2px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Insight -->
+          <div class="sc-ai">
+            <div class="sc-ai-lbl">✦ AI Insight</div>
+            <div class="sc-ai-txt">Your 2pm HRV dip links to anxiety. Try AR Reset →</div>
+          </div>
+
+        </div><!-- /phone-screen -->
+      </div><!-- /phone-shell -->
+    </div><!-- /phone-wrap -->
+  </div><!-- /phone-scene -->
+
+  <!-- ── RIGHT: Detail card (Stride-style) ── -->
+  <div class="detail-card" id="detailCard">
+    <div class="detail-card-inner">
+      <div class="dc-label">Today's Recovery</div>
+      <div class="dc-desc">Hamstring Stretch · Breathing Reset · HRV Boost</div>
+      <div class="dc-imgs">
+        <div class="dc-img"><div class="dc-img-icon">🏃</div></div>
+        <div class="dc-img"><div class="dc-img-icon">🧘</div></div>
+        <div class="dc-img"><div class="dc-img-icon">💤</div></div>
+      </div>
+      <div class="dc-metric">
+        <div>
+          <div class="dc-metric-val">8.8</div>
+          <div class="dc-metric-lbl">Recovery Score</div>
+        </div>
+        <div style="width:44px;height:44px;position:relative;">
+          <svg width="44" height="44" viewBox="0 0 44 44">
+            <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(0,201,167,.1)" stroke-width="4"/>
+            <circle cx="22" cy="22" r="18" fill="none" stroke="#00C9A7" stroke-width="4"
+              stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="22"
+              transform="rotate(-90 22 22)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Update badge ── -->
+  <div class="update-badge" id="updateBadge">
+    <div class="update-icon">📱</div>
+    <div>
+      <div class="update-text">New Update Available</div>
+      <div class="update-sub">VScore™ v2.4 — smarter insights</div>
+    </div>
+  </div>
+
+  <!-- ── Brand logos ── -->
+  <div class="brand-row" id="brandRow">
+    <div class="brand-logo">Apple Health</div>
+    <div class="brand-logo">WHOOP</div>
+    <div class="brand-logo">Oura</div>
+    <div class="brand-logo">Garmin</div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator" id="scrollIndicator">
+    <div class="scroll-line"></div>
+    <div class="scroll-label">Scroll to explore</div>
+  </div>
+
+</div><!-- /sticky-hero -->
+</div><!-- /scroll-container -->
+
+<!-- ============================================================
+     CONTENT AFTER HERO
+============================================================ -->
+<div class="after-hero">
+  <div class="feature-card">
+    <div class="fc-icon">🧠</div>
+    <div class="fc-title">AI Correlation Engine</div>
+    <div class="fc-desc">Spots invisible links between HRV, mood swings, sleep quality, and stress — weeks before you notice them.</div>
+  </div>
+  <div class="feature-card">
+    <div class="fc-icon">🥽</div>
+    <div class="fc-title">AR Grounding Sessions</div>
+    <div class="fc-desc">Point your camera at the world. Breathing guides overlay reality — reducing acute anxiety in under 3 minutes.</div>
+  </div>
+  <div class="feature-card">
+    <div class="fc-icon">🌙</div>
+    <div class="fc-title">Sleep Soundwaves</div>
+    <div class="fc-desc">Binaural beats calibrated to your unique sleep profile. 200+ nature sounds dialled to your brain's rhythms.</div>
+  </div>
+  <div class="feature-card">
+    <div class="fc-icon">🪪</div>
+    <div class="fc-title">Digital Health ID</div>
+    <div class="fc-desc">One QR carries your complete health history — accepted at 200+ healthcare providers worldwide.</div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCROLL ANIMATION ENGINE
+============================================================ -->
+<script>
+const container    = document.getElementById('scrollContainer');
+const progressBar  = document.getElementById('progressBar');
+const bgGrid       = document.getElementById('bgGrid');
+const bgFloor      = document.getElementById('bgFloor');
+const bgGlow       = document.getElementById('bgGlow');
+const bgSky        = document.getElementById('bgSky');
+const phoneScene   = document.getElementById('phoneScene');
+const phoneWrap    = document.getElementById('phoneWrap');
+const heroHeadline = document.getElementById('heroHeadline');
+const eyebrow      = document.getElementById('eyebrow');
+const heroH1       = document.getElementById('heroH1');
+const heroSub      = document.getElementById('heroSub');
+const heroBtns     = document.getElementById('heroBtns');
+const eventCard    = document.getElementById('eventCard');
+const detailCard   = document.getElementById('detailCard');
+const updateBadge  = document.getElementById('updateBadge');
+const brandRow     = document.getElementById('brandRow');
+const scrollInd    = document.getElementById('scrollIndicator');
+
+/* ── Easing helpers ── */
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+function easeInOut(t) { return t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+/* Map value from [inLo,inHi] → [outLo,outHi] */
+function mapRange(v, inLo, inHi, outLo, outHi) {
+  return outLo + (outHi - outLo) * clamp((v - inLo) / (inHi - inLo), 0, 1);
+}
+
+/* ── FRAME 1 initial state ── */
+/* Everything starts invisible/small — this IS Frame 1 */
+function setFrame1() {
+  /* Text: hidden */
+  [eyebrow, heroH1, heroSub, heroBtns, eventCard].forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(28px)';
+  });
+  /* Phone: small, centered, flat */
+  phoneScene.style.right = '50%';
+  phoneScene.style.transform = 'translateX(50%) translateY(-50%) scale(0.72) rotateX(8deg)';
+  /* Detail card: hidden */
+  detailCard.style.opacity = '0';
+  detailCard.style.transform = 'translateY(30px) translateX(20px)';
+  /* Update badge / brands: hidden */
+  updateBadge.style.opacity = '0';
+  brandRow.style.opacity = '0';
+  /* Grid: faint */
+  bgGrid.style.opacity = '0.4';
+  bgFloor.style.opacity = '0.3';
+  bgGlow.style.opacity = '0.3';
+}
+
+setFrame1();
+
+/* ── SCROLL HANDLER ── */
+let ticking = false;
+
+function onScroll() {
+  if (!ticking) {
+    requestAnimationFrame(updateAnim);
+    ticking = true;
+  }
+}
+
+function updateAnim() {
+  ticking = false;
+
+  const scrollTop  = window.scrollY;
+  const heroHeight = container.offsetHeight - window.innerHeight;
+  /* p = 0 (top, Frame1) → 1 (bottom, Frame2) */
+  const p = clamp(scrollTop / heroHeight, 0, 1);
+  const ep = easeOut(p);
+  const eip = easeInOut(p);
+
+  /* Progress bar */
+  progressBar.style.width = (p * 100) + '%';
+
+  /* ── PHASE 0 → 0.15: Grid illuminates ── */
+  const gridP = mapRange(p, 0, 0.15, 0.4, 1);
+  bgGrid.style.opacity = gridP;
+  bgFloor.style.opacity = mapRange(p, 0, 0.2, 0.3, 0.8);
+  bgGlow.style.opacity = mapRange(p, 0, 0.3, 0.3, 1);
+
+  /* Background sky color shift (black → dark teal-blue) */
+  const skyAlpha = mapRange(p, 0.2, 0.8, 0, 0.35);
+  bgSky.style.background = `radial-gradient(ellipse 130% 70% at 65% 110%,
+    rgba(0,201,167,${skyAlpha}) 0%,
+    rgba(0,30,40,${skyAlpha * 0.5}) 40%,
+    transparent 70%)`;
+
+  /* ── PHASE 0.05 → 0.35: Phone rises + moves right ── */
+  const phoneP = easeOut(mapRange(p, 0.05, 0.35, 0, 1));
+  /* Scale: 0.72 → 1 */
+  const phoneScale = 0.72 + 0.28 * phoneP;
+  /* rotateX: 8deg → 2deg */
+  const phoneRotX = 8 - 6 * phoneP;
+  /* Position: center → right side (use translateX % trick) */
+  /* We animate via transform on the scene */
+  const phoneTransX = mapRange(phoneP, 0, 1, 50, 0); /* % from right edge */
+  phoneScene.style.right = phoneTransX + '%';
+  phoneScene.style.transform = `translateX(${phoneTransX > 10 ? '50%' : '0'}) translateY(-50%) scale(${phoneScale}) rotateX(${phoneRotX}deg) rotateY(-4deg)`;
+
+  /* ── PHASE 0.15 → 0.45: Headline reveals (stagger) ── */
+  /* Eyebrow */
+  const eyebrowP = easeOut(mapRange(p, 0.15, 0.32, 0, 1));
+  eyebrow.style.opacity = eyebrowP;
+  eyebrow.style.transform = `translateY(${(1-eyebrowP)*22}px)`;
+
+  /* H1 */
+  const h1P = easeOut(mapRange(p, 0.20, 0.38, 0, 1));
+  heroH1.style.opacity = h1P;
+  heroH1.style.transform = `translateY(${(1-h1P)*26}px)`;
+
+  /* Sub */
+  const subP = easeOut(mapRange(p, 0.26, 0.44, 0, 1));
+  heroSub.style.opacity = subP;
+  heroSub.style.transform = `translateY(${(1-subP)*20}px)`;
+
+  /* Buttons */
+  const btnP = easeOut(mapRange(p, 0.32, 0.50, 0, 1));
+  heroBtns.style.opacity = btnP;
+  heroBtns.style.transform = `translateY(${(1-btnP)*16}px) scale(${0.9 + 0.1*btnP})`;
+
+  /* Event card */
+  const cardP = easeOut(mapRange(p, 0.38, 0.56, 0, 1));
+  eventCard.style.opacity = cardP;
+  eventCard.style.transform = `translateY(${(1-cardP)*20}px)`;
+
+  /* ── PHASE 0.40 → 0.65: Detail card slides in from right ── */
+  const dcP = easeOut(mapRange(p, 0.40, 0.65, 0, 1));
+  detailCard.style.opacity = dcP;
+  detailCard.style.transform = `translateY(-${40 - 40*dcP}%) translateX(${(1-dcP)*30}px)`;
+
+  /* ── PHASE 0.50 → 0.70: Update badge ── */
+  const badgeP = easeOut(mapRange(p, 0.50, 0.70, 0, 1));
+  updateBadge.style.opacity = badgeP;
+  updateBadge.style.transform = `translateY(${(1-badgeP)*20}px)`;
+
+  /* ── PHASE 0.55 → 0.75: Brand logos ── */
+  brandRow.style.opacity = easeOut(mapRange(p, 0.55, 0.75, 0, 1));
+
+  /* ── Scroll indicator fades out early ── */
+  scrollInd.style.opacity = mapRange(p, 0, 0.12, 1, 0);
+
+  /* ── Grid scroll offset (parallax) ── */
+  const gridOffset = p * 60;
+  bgGrid.style.backgroundPositionY = gridOffset + 'px';
+
+  /* ── Glow moves upward slightly ── */
+  const glowY = mapRange(p, 0, 1, 0, -30);
+  bgGlow.style.transform = `translate(-50%, calc(-50% + ${glowY}px))`;
+  bgGlow.style.width  = mapRange(p, 0, 1, 600, 800) + 'px';
+  bgGlow.style.height = mapRange(p, 0, 1, 600, 800) + 'px';
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+updateAnim(); /* Run once on load */
+
+/* ── After-hero feature cards: intersection observer ── */
+const featureCards = document.querySelectorAll('.feature-card');
+const io = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }, i * 100);
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+featureCards.forEach(c => {
+  c.style.opacity = '0';
+  c.style.transform = 'translateY(30px)';
+  c.style.transition = 'opacity .6s var(--eo), transform .6s var(--eo)';
+  io.observe(c);
+});
+
+/* ── Reduced motion ── */
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.style.setProperty('--eo', 'linear');
+  /* Jump to final state */
+  window.scrollTo(0, container.offsetHeight - window.innerHeight);
+  updateAnim();
+}
+</script>
+</body>
+</html>

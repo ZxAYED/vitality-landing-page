@@ -1,0 +1,139 @@
+﻿.section {
+  padding: 120px 0;
+  overflow: hidden;
+}
+
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.7;
+  margin-bottom: 64px;
+}
+
+.marqueeWrapper {
+  width: 100%;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+  /* Fades on the edges */
+  mask-image: linear-gradient(to right,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent);
+  -webkit-mask-image: linear-gradient(to right,
+      transparent,
+      black 10%,
+      black 90%,
+      transparent);
+}
+
+.marqueeTrack {
+  display: flex;
+  min-width: max-content;
+  animation: scrollMarquee 40s linear infinite;
+  gap: 24px;
+  padding-left: 24px;
+}
+
+.marqueeTrack:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scrollMarquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(calc(-50% - 12px));
+  }
+}
+
+.card {
+  width: 400px;
+  padding: 32px;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-card-border);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: all 0.4s var(--ease-out);
+  white-space: normal;
+  /* Override min-width max-content */
+}
+
+.card:hover {
+  border-color: rgba(61, 108, 245, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 6px 14px;
+  border: 1px solid;
+  border-radius: 100px;
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tagDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.text {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--grey-200);
+  flex: 1;
+}
+
+.stars {
+  font-size: 16px;
+  color: var(--mood-great);
+  letter-spacing: 4px;
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 80px 0;
+  }
+
+  .card {
+    width: 320px;
+    padding: 24px;
+  }
+
+  .text {
+    font-size: 15px;
+  }
+}

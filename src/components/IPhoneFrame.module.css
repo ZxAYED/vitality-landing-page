@@ -1,0 +1,133 @@
+﻿.frame {
+  position: relative;
+  width: 340px;
+  height: 720px;
+  border-radius: 54px;
+  background: #0d0e10;
+  border: 12px solid #000;
+  box-shadow:
+    0 0 0 2px #2f2f31,
+    inset 0 0 0 2px #1c1c1e,
+    0 20px 80px rgba(0, 0, 0, 0.6),
+    0 0 60px rgba(61, 108, 245, 0.08);
+  overflow: hidden;
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  left: -15px;
+  top: 150px;
+  width: 3px;
+  height: 30px;
+  background: #2a2a2c;
+  border-radius: 2px 0 0 2px;
+  box-shadow: 0 60px 0 0 #2a2a2c, 0 120px 0 0 #2a2a2c;
+  z-index: 5;
+}
+
+.frame::after {
+  content: "";
+  position: absolute;
+  right: -15px;
+  top: 190px;
+  width: 3px;
+  height: 60px;
+  background: #2a2a2c;
+  border-radius: 0 2px 2px 0;
+  z-index: 5;
+}
+
+.dynamicIsland {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 30px;
+  background: #000;
+  border-radius: 20px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.islandDot {
+  width: 10px;
+  height: 10px;
+  background: #111;
+  border-radius: 50%;
+}
+
+.islandCam {
+  width: 12px;
+  height: 12px;
+  background: #0a0a0c;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 4px rgba(61, 108, 245, 0.2);
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-primary);
+  border-radius: 42px;
+  padding-top: 56px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.homeIndicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.bar {
+  width: 120px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 4px;
+}
+
+@media (max-width: 900px) {
+  .frame {
+    width: min(280px, 100%);
+    height: 593px;
+    border-radius: 46px;
+    border-width: 10px;
+  }
+
+  .screen {
+    border-radius: 36px;
+    padding-top: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .frame {
+    width: min(260px, 100%);
+    height: 550px;
+    border-radius: 42px;
+    border-width: 8px;
+  }
+
+  .screen {
+    border-radius: 34px;
+    padding-top: 44px;
+  }
+
+  .frame::before,
+  .frame::after {
+    display: none;
+  }
+}
+
+

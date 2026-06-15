@@ -1,0 +1,45 @@
+﻿.section {
+  position: relative;
+  padding: 88px 0 64px;
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(61, 108, 245, 0.1) 0%, rgba(123, 97, 255, 0.06) 35%, transparent 70%);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 32px;
+  text-align: center;
+}
+
+.wordmark {
+  font-size: clamp(52px, 14vw, 188px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+}
+
+.sub {
+  margin-top: 12px;
+  font-size: clamp(13px, 1.3vw, 16px);
+  color: var(--text-secondary);
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 72px 0 52px;
+  }
+
+  .inner {
+    padding: 0 20px;
+  }
+}
+

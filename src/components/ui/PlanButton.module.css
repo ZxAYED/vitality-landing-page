@@ -1,0 +1,44 @@
+﻿.button {
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 11px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  transition: all 240ms var(--ease-out);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.icon {
+  display: inline-flex;
+}
+
+.primary {
+  color: var(--white);
+  background: linear-gradient(135deg, var(--primary), #5b7fff);
+  border: 1px solid rgba(61, 108, 245, 0.65);
+}
+
+.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(61, 108, 245, 0.35);
+}
+
+.secondary {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--bg-card-border);
+}
+
+.secondary:hover {
+  border-color: rgba(61, 108, 245, 0.55);
+  background: rgba(61, 108, 245, 0.08);
+}
+

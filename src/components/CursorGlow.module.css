@@ -1,0 +1,47 @@
+﻿.cursorGlow {
+  position: fixed;
+  width: 700px;
+  /* slightly larger for a softer spread */
+  height: 700px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.8s ease;
+
+  /* Soft, calming, medical/wellness gradient (whites, mints, and soft blues) */
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.08) 0%,
+      /* Clean white core */
+      rgba(72, 199, 165, 0.06) 20%,
+      /* Calming health/mint green */
+      rgba(61, 140, 245, 0.04) 45%,
+      /* Gentle blue */
+      transparent 70%);
+  filter: blur(80px);
+  /* Softer falloff */
+  mix-blend-mode: screen;
+  animation: breathe 7s ease-in-out infinite;
+  /* Slower, more organic heartbeat/breathing */
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(0.95);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.85;
+  }
+}
+
+/* Disable on mobile/tablet */
+@media (max-width: 1024px) {
+  .cursorGlow {
+    display: none;
+  }
+}
